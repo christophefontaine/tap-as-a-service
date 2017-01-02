@@ -13,12 +13,9 @@
 # under the License.
 
 """VPP Taas service plugin."""
-import eventlet
-import threading
 import json
 from networking_vpp import feature
 from networking_vpp import mech_vpp
-from neutron import context
 from neutron_lib import constants
 from neutron_lib import exceptions as n_exc
 from neutron_taas.extensions import taas as taas_ex
@@ -32,9 +29,10 @@ LOG = logging.getLogger(__name__)
 
 COMMUNICATION_TIMEOUT = 60
 
+
 class FeatureTaasService(feature.ServerFeature):
     """FeatureTaasService.
-    
+
     Server side of the TaaS Service functionnality.
     """
 
@@ -67,7 +65,7 @@ class FeatureTaasService(feature.ServerFeature):
 
 class FeatureTaasFlow(feature.ServerFeature):
     """FeatureTaasFlow.
-    
+
     Server side of the TaaS Flow functionnality.
     """
 
@@ -137,8 +135,10 @@ class TaasEtcdDriver(service_drivers.TaasBaseDriver):
         tap_id_association = context._plugin.create_tap_id_association(
             context._plugin_context, ts['id'])
         context.tap_id_association = tap_id_association
-        self.service_plugin.update_tap_service(context._plugin_context, ts['id'],
-                                               {'tap_service': context.tap_service})
+        self.service_plugin.update_tap_service(context._plugin_context,
+                                               ts['id'],
+                                               {'tap_service':
+                                                   context.tap_service})
         ts = context.tap_service
         tap_id_association = context.tap_id_association
         taas_vlan_id = (tap_id_association['taas_id'] +
@@ -153,7 +153,7 @@ class TaasEtcdDriver(service_drivers.TaasBaseDriver):
                    'taas_id': taas_vlan_id,
                    'port': port}
 
-        # TODO(cfontaine): is there a better way to get 
+        # TODO(cfontaine): is there a better way to get
         # the context in the callback ?
         self.taas_service.create(port, rpc_msg)
         return
@@ -198,8 +198,9 @@ class TaasEtcdDriver(service_drivers.TaasBaseDriver):
         tf = context.tap_flow
         tf['status'] = constants.PENDING_CREATE
         taas_id = self._get_taas_id(context._plugin_context, tf)
-        
-        self.service_plugin.update_tap_flow(context._plugin_context, tf['id'], {'tap_flow': tf})
+
+        self.service_plugin.update_tap_flow(context._plugin_context,
+                                            tf['id'], {'tap_flow': tf})
         # Extract the host where the source port is located
         port = self.service_plugin._get_port_details(context._plugin_context,
                                                      tf['source_port'])
@@ -221,18 +222,10 @@ class TaasEtcdDriver(service_drivers.TaasBaseDriver):
     def delete_tap_flow_precommit(self, context):
         """Send tap flow deletion RPC message to agent."""
         tf = context.tap_flow
-        taas_id = self._get_taas_id(context._plugin_context, tf)
         # Extract the host where the source port is located
         port = self.service_plugin._get_port_details(context._plugin_context,
                                                      tf['source_port'])
         host = port['binding:host_id']
-        port_mac = port['mac_address']
-        # Send RPC message to both the source port host and
-        # tap service(destination) port host
-        rpc_msg = {'tap_flow': tf,
-                   'port_mac': port_mac,
-                   'taas_id': taas_id,
-                   'port': port}
 
         self.taas_flow.delete(host, tf['id'])
         return
