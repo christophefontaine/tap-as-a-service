@@ -91,11 +91,11 @@ class VPPInterfaceEx(object):
         LOG.debug("Enable broadcase (disable mac learning) for bridge %d",
                   bridge_domain_id)
         t = self._vpp.bridge_flags(bd_id=bridge_domain_id, is_set=0,
-                                       feature_bitmap=(L2_LEARN | L2_FWD |
-                                                       L2_FLOOD | L2_UU_FLOOD |
-                                                       L2_ARP_TERM))
+                                   feature_bitmap=(L2_LEARN | L2_FWD |
+                                                   L2_FLOOD | L2_UU_FLOOD |
+                                                   L2_ARP_TERM))
         t = self._vpp.bridge_flags(bd_id=bridge_domain_id, is_set=1,
-                                       feature_bitmap=L2_FLOOD)
+                                   feature_bitmap=L2_FLOOD)
         self._check_retval(t)
 
 
